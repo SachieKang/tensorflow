@@ -97,6 +97,8 @@ tf_cuda_library(
         ":kernel_and_device",
         ":tensor_handle",
         "//tensorflow/core:framework",
+        "//tensorflow/core/platform:errors",
+        "//tensorflow/core/platform:platform_port",
         "@com_google_absl//absl/types:optional",
     ],
 )
@@ -216,6 +218,7 @@ KERNEL_AND_DEVICE_DEPS = [
     "//tensorflow/core:lib",
     "//tensorflow/core:lib_internal",
     "//tensorflow/core:protos_all_cc",
+    "//tensorflow/core/profiler/lib:annotated_traceme",
     "//tensorflow/core/profiler/lib:traceme",
     "//tensorflow/core/grappler/optimizers:meta_optimizer",
 ]
@@ -232,10 +235,10 @@ tf_cuda_library(
     deps = [
         ":attr_builder",
         ":process_function_library_runtime",
-        "@farmhash_archive//:farmhash",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/types:optional",
+        "@farmhash_archive//:farmhash",
     ] + select({
         "//tensorflow:android": [
             "//tensorflow/core:android_tensorflow_lib_lite",
@@ -325,6 +328,7 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:span",
         "@com_google_absl//absl/memory",
+        "//tensorflow/compiler/jit:common",
         "//tensorflow/core/profiler/lib:traceme",
     ] + select({
         "//tensorflow:android": [
@@ -356,6 +360,7 @@ cc_library(
         "//tensorflow/core:lib",
         "//tensorflow/core:mkl_graph_util",
     ],
+    alwayslink = 1,
 )
 
 tf_cc_test_mkl(
@@ -397,10 +402,10 @@ tf_cuda_library(
     hdrs = ["attr_builder.h"],
     visibility = ["//tensorflow:internal"],
     deps = [
-        "@farmhash_archive//:farmhash",
         # Only the TF_AttrType enum is required, so pull in just the C headers.
         # TODO(b/113535673): Break this dependency and avoid the C header completely.
         "//tensorflow/c:tf_attrtype",
+        "@farmhash_archive//:farmhash",
     ] + select({
         "//tensorflow:android": [
             "//tensorflow/core:android_tensorflow_lib_lite",
@@ -433,6 +438,23 @@ tf_cc_test(
         "//tensorflow/core:tensorflow",
         "//tensorflow/core:test",
         "//tensorflow/core:test_main",
+    ],
+)
+
+filegroup(
+    name = "pywrap_eager_hdrs",
+    srcs = [
+        "attr_builder.h",
+        "context.h",
+        "eager_executor.h",
+        "eager_operation.h",
+        "kernel_and_device.h",
+        "tensor_handle.h",
+        "tensor_handle_data.h",
+    ],
+    visibility = [
+        "//tensorflow/core:__pkg__",
+        "//tensorflow/python:__pkg__",
     ],
 )
 
